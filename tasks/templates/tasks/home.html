@@ -122,7 +122,7 @@
             {% for task in current_tasks %}
                 <button type="button" class="task-button check-condition" data-task-id="{{ task.id }}"
                         data-created="{{ task.created|date:'U' }}">
-                    {{ task.title|truncatechars:50 }} <span class="time-since">00:01 </span>
+                    {{ task.title|truncatechars:50 }} <span class="time-since">00:01</span>
                 </button>
             {% endfor %}
         </div>
@@ -157,7 +157,9 @@
 
             let hours = Math.floor(diffInSeconds / 3600);
             let minutes = Math.ceil((diffInSeconds % 3600) / 60);
-            if (minutes === 60) {
+            if (hours === 0 && minutes === 0) {
+                minutes = 1;
+            } else if (minutes === 60) {
                 hours += 1
                 minutes = 0
             }

@@ -9,9 +9,6 @@ def work_time(task):
     hours, remainder = divmod(time_.seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
 
-    if len(str(hours)) == 1:
-        hours = f'0{hours}'
-    if len(str(minutes)) == 1:
-        minutes = f'0{minutes}'
-
-    return f'{hours}:{minutes}'
+    if hours == 0:
+        return f'{minutes} м'
+    return f'{hours} ч {minutes} м'
