@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+{% load filters %}
+
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список Задач</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000000;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .input-group {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .input-group input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px 0 0 5px;
+            background-color: #1f1f1f;
+            color: white;
+        }
+
+        .input-group button {
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            background-color: #1f1f1f;
+            color: white;
+            cursor: pointer;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .tasks {
+            margin-bottom: 20px;
+        }
+
+        .tasks h2 {
+            margin-top: 0;
+        }
+
+        .completed-task,
+        .task-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #000000;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            color: white;
+            text-align: left;
+            width: 500px;
+            cursor: pointer;
+            border-bottom: 1px solid white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .completed-task:last-child,
+        .task-button:last-child {
+            border-bottom: none;
+        }
+
+        .completed-task span,
+        .task-button span {
+            margin-left: auto;
+        }
+
+        .completed-task {
+            cursor: default;
+        }
+
+        .delete-task {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding-left: 15px;
+            font-size: 18px;
+        }
+
+        .completed-task {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+
+    </style>
+</head>
+
+
+<body>
+
+<div class="container">
+    <form method="POST">
+        <div class="input-group">
+            {% csrf_token %}
+            <input type="text" name="title" placeholder="Добавьте новую задачу">
+            <button type="submit">▶</button>
+        </div>
+    </form>
+
+    {% if current_tasks %}
+        <div class="tasks">
+            <h2>Текущие задачи</h2>
+            {% for task in current_tasks %}
+                <button type="button" class="task-button check-condition" data-task-id="{{ task.id }}"
+                        data-created="{{ task.created|date:'U' }}">
+                    {{ task.title|truncatechars:50 }} <span class="time-since">00:01 </span>
+                </button>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+
+    {% if completed_tasks %}
+        <div class="tasks">
+            <h2>Завершенные задачи</h2>
+            {% for task in completed_tasks %}
+                <div class="completed-task">
+                    {{ task.title|truncatechars:50 }} <span>{{ task|work_time }}</span>
+                    <form action="{% url 'delete_task' task.id %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-task">🗑️</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+</div>
+
+</body>
+<script>
+    function updateTimeSince() {
+        const tasks = document.querySelectorAll('.task-button');
+        tasks.forEach(function (task) {
+            const createdTime = parseInt(task.getAttribute('data-created'), 10);
+            const now = Math.floor(Date.now() / 1000);
+            const diffInSeconds = now - createdTime;
+
+            let hours = Math.floor(diffInSeconds / 3600);
+            let minutes = Math.ceil((diffInSeconds % 3600) / 60);
+            if (minutes === 60) {
+                hours += 1
+                minutes = 0
+            }
+            const hours_str = hours.toString().padStart(2, '0');
+            const minutes_str = minutes.toString().padStart(2, '0');
+            task.querySelector('.time-since').textContent = hours_str + ":" + minutes_str;
+        });
+    }
+
+    setInterval(updateTimeSince, 1);
+    updateTimeSince();
+
+    const baseUrl = "{% url 'complete_task' 0 %}".replace(/0$/, '');
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.check-condition').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const taskId = this.getAttribute('data-task-id');
+                const createdTime = parseInt(this.getAttribute('data-created'), 10);
+                const currentTime = Math.floor(Date.now() / 1000);
+
+                if (currentTime - createdTime < 60) {
+                    alert('Задачи длительностью менее 1 минуты не сохраняются!');
+                } else {
+                    window.location.href = baseUrl + taskId;
+                }
+            });
+        });
+    });
+
+</script>
+
+
+</html>
