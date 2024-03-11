@@ -156,16 +156,12 @@
             const diffInSeconds = now - createdTime;
 
             let hours = Math.floor(diffInSeconds / 3600);
-            let minutes = Math.ceil((diffInSeconds % 3600) / 60);
-            if (hours === 0 && minutes === 0) {
-                minutes = 1;
-            } else if (minutes === 60) {
-                hours += 1
-                minutes = 0
-            }
+            let minutes = Math.floor((diffInSeconds % 3600) / 60);
+            let seconds = Math.floor(diffInSeconds % 60);
             const hours_str = hours.toString().padStart(2, '0');
             const minutes_str = minutes.toString().padStart(2, '0');
-            task.querySelector('.time-since').textContent = hours_str + ":" + minutes_str;
+            const seconds_str = seconds.toString().padStart(2, '0');
+            task.querySelector('.time-since').textContent = hours_str + ":" + minutes_str + ":" + seconds_str;
         });
     }
 
